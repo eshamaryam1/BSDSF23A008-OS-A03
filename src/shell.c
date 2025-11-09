@@ -1,4 +1,9 @@
 #include "shell.h"
+#include <unistd.h>
+
+
+char* history[HISTORY_SIZE];
+int history_count = 0;
 
 char* read_cmd(char* prompt, FILE* fp) {
     printf("%s", prompt);
@@ -12,7 +17,7 @@ char* read_cmd(char* prompt, FILE* fp) {
 
     if (c == EOF && pos == 0) {
         free(cmdline);
-        return NULL; 
+        return NULL;
     }
     
     cmdline[pos] = '\0';
@@ -20,7 +25,6 @@ char* read_cmd(char* prompt, FILE* fp) {
 }
 
 char** tokenize(char* cmdline) {
-   
     if (cmdline == NULL || cmdline[0] == '\0' || cmdline[0] == '\n') {
         return NULL;
     }
@@ -39,7 +43,7 @@ char** tokenize(char* cmdline) {
     while (*cp != '\0' && argnum < MAXARGS) {
         while (*cp == ' ' || *cp == '\t') cp++;
         
-        if (*cp == '\0') break; 
+        if (*cp == '\0') break;
 
         start = cp;
         len = 1;
@@ -62,7 +66,6 @@ char** tokenize(char* cmdline) {
 }
 
 
-#include <unistd.h>
 
 int handle_builtin(char** arglist) {
     if (arglist[0] == NULL) return 0;
@@ -95,11 +98,20 @@ int handle_builtin(char** arglist) {
         return 1;
     }
 
-    // jobs 
+    // jobs
     if (strcmp(arglist[0], "jobs") == 0) {
         printf("Job control not yet implemented.\n");
         return 1;
     }
+
+	// history
+    if (strcmp(arglist[0], "history") == 0) {
+        for (int i = 0; i < history_count; i++) {
+        printf("%d  %s\n", i+1, history[i]);
+    }
+    return 1;
+}
+
 
     return 0; 
 }

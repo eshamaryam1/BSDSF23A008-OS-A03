@@ -14,8 +14,7 @@ int execute(char* arglist[]) {
             exit(1);
         default: 
             waitpid(cpid, &status, 0);
-           
+            // printf("Child pid:%d exited with status %d\n", cpid, status >> 8);
             return 0;
     }
 }
-
