@@ -1,0 +1,8 @@
+total 24
+drwxrwxr-x 2 esha esha 4096 Nov  9 22:07 bin
+drwxrwxr-x 2 esha esha 4096 Nov  9 22:07 include
+-rw-rw-r-- 1 esha esha  466 Nov  8 20:20 Makefile
+drwxrwxr-x 2 esha esha 4096 Nov  9 22:07 obj
+-rw-r--r-- 1 esha esha    0 Nov  9 22:08 out.txt
+-rw-rw-r-- 1 esha esha   20 Nov  9 17:45 README.md
+drwxrwxr-x 2 esha esha 4096 Nov  9 22:06 src

@@ -28,7 +28,7 @@ int main() {
     while (1) {
 
         cmdline = readline(PROMPT);
-        if (cmdline == NULL) { 
+        if (cmdline == NULL) {
             printf("\nExiting shell...\n");
             break;
         }
