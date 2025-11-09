@@ -20,6 +20,7 @@ char* read_cmd(char* prompt, FILE* fp) {
 }
 
 char** tokenize(char* cmdline) {
+   
     if (cmdline == NULL || cmdline[0] == '\0' || cmdline[0] == '\n') {
         return NULL;
     }
@@ -36,7 +37,7 @@ char** tokenize(char* cmdline) {
     int argnum = 0;
 
     while (*cp != '\0' && argnum < MAXARGS) {
-        while (*cp == ' ' || *cp == '\t') cp++; 
+        while (*cp == ' ' || *cp == '\t') cp++;
         
         if (*cp == '\0') break; 
 
@@ -60,3 +61,45 @@ char** tokenize(char* cmdline) {
     return arglist;
 }
 
+
+#include <unistd.h>
+
+int handle_builtin(char** arglist) {
+    if (arglist[0] == NULL) return 0;
+
+    // exit
+    if (strcmp(arglist[0], "exit") == 0) {
+        printf("Exiting shell...\n");
+        exit(0);
+    }
+
+    // cd
+    if (strcmp(arglist[0], "cd") == 0) {
+        if (arglist[1] == NULL) {
+            fprintf(stderr, "cd: missing argument\n");
+        } else {
+            if (chdir(arglist[1]) != 0) {
+                perror("cd failed");
+            }
+        }
+        return 1;
+    }
+
+    // help
+    if (strcmp(arglist[0], "help") == 0) {
+        printf("Built-in commands:\n");
+        printf("  cd <directory>  : Change directory.\n");
+        printf("  exit            : Exit the shell.\n");
+        printf("  help            : Show help.\n");
+        printf("  jobs            : Show job placeholder.\n");
+        return 1;
+    }
+
+    // jobs 
+    if (strcmp(arglist[0], "jobs") == 0) {
+        printf("Job control not yet implemented.\n");
+        return 1;
+    }
+
+    return 0; 
+}
