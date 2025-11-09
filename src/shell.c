@@ -17,48 +17,43 @@ char* read_cmd(char* prompt, FILE* fp) {
 
     if (c == EOF && pos == 0) {
         free(cmdline);
-        return NULL; 
+        return NULL;
     }
     
     cmdline[pos] = '\0';
     return cmdline;
 }
 
+
 char** tokenize(char* cmdline) {
-    if (cmdline == NULL || cmdline[0] == '\0' || cmdline[0] == '\n') {
-        return NULL;
-    }
-
-    char** arglist = (char**)malloc(sizeof(char*) * (MAXARGS + 1));
-    for (int i = 0; i < MAXARGS + 1; i++) {
-        arglist[i] = (char*)malloc(sizeof(char) * ARGLEN);
-        bzero(arglist[i], ARGLEN);
-    }
-
-    char* cp = cmdline;
-    char* start;
-    int len;
+    char** arglist = malloc(sizeof(char*) * (MAXARGS + 1));
     int argnum = 0;
+    char* p = cmdline;
 
-    while (*cp != '\0' && argnum < MAXARGS) {
-        while (*cp == ' ' || *cp == '\t') cp++; 
-        
-        if (*cp == '\0') break; 
+    while (*p != '\0' && argnum < MAXARGS) {
+        while (*p == ' ' || *p == '\t') p++;
 
-        start = cp;
-        len = 1;
-        while (*++cp != '\0' && !(*cp == ' ' || *cp == '\t')) {
-            len++;
+        if (*p == '\0') break;
+
+        if (*p == '<' || *p == '>' || *p == '|') {
+            arglist[argnum] = malloc(2);
+            arglist[argnum][0] = *p;
+            arglist[argnum][1] = '\0';
+            argnum++;
+            p++;
+            continue;
         }
+
+        char* start = p;
+        int len = 0;
+        while (*p != '\0' && *p != ' ' && *p != '\t' && *p != '<' && *p != '>' && *p != '|') {
+            p++; len++;
+        }
+
+        arglist[argnum] = malloc(len + 1);
         strncpy(arglist[argnum], start, len);
         arglist[argnum][len] = '\0';
         argnum++;
-    }
-
-    if (argnum == 0) { 
-        for(int i = 0; i < MAXARGS + 1; i++) free(arglist[i]);
-        free(arglist);
-        return NULL;
     }
 
     arglist[argnum] = NULL;
