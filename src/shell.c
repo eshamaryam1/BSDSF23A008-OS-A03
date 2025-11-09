@@ -1,9 +1,9 @@
 #include "shell.h"
-#include <unistd.h>
-
 
 char* history[HISTORY_SIZE];
 int history_count = 0;
+job_t bg_jobs[MAX_JOBS];
+int bg_count = 0;
 
 char* read_cmd(char* prompt, FILE* fp) {
     printf("%s", prompt);
@@ -17,7 +17,7 @@ char* read_cmd(char* prompt, FILE* fp) {
 
     if (c == EOF && pos == 0) {
         free(cmdline);
-        return NULL;
+        return NULL; 
     }
     
     cmdline[pos] = '\0';
@@ -93,11 +93,14 @@ int handle_builtin(char** arglist) {
         return 1;
     }
 
-    // jobs 
-    if (strcmp(arglist[0], "jobs") == 0) {
-        printf("Job control not yet implemented.\n");
-        return 1;
-    }
+    // jobs
+	if (strcmp(arglist[0], "jobs") == 0) {
+	    for (int i = 0; i < bg_count; i++) {
+	        printf("[%d] PID: %d  Command: %s\n", i+1, bg_jobs[i].pid, bg_jobs[i].cmd);
+	    }
+	    return 1;
+	}
+
 
 	// history
     if (strcmp(arglist[0], "history") == 0) {

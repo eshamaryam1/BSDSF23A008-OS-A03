@@ -14,10 +14,17 @@
 #define ARGLEN 30
 #define PROMPT "PUCIT> "
 #define HISTORY_SIZE 20
+#define MAX_JOBS 50
+typedef struct {
+    int pid;             
+    char cmd[MAX_LEN];   
+} job_t;
+extern job_t bg_jobs[MAX_JOBS];
+extern int bg_count;
 extern char* history[HISTORY_SIZE];
 extern int history_count;
 char* read_cmd(char* prompt, FILE* fp);
 char** tokenize(char* cmdline);
-int execute(char** arglist);
+int execute(char* arglist[], int background);
 int handle_builtin(char** arglist);
 #endif
