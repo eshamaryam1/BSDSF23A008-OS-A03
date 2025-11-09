@@ -21,14 +21,27 @@ void add_to_history(char* cmd) {
 
 int main() {
     char* cmdline;
-    char** arglist;
 
     rl_bind_key('\t', rl_complete);
 
     while (1) {
 
+	int status;
+    pid_t finished;
+    for (int i = 0; i < bg_count; ) {
+        finished = waitpid(bg_jobs[i].pid, &status, WNOHANG);
+        if (finished > 0) {
+            for (int j = i; j < bg_count - 1; j++) {
+                bg_jobs[j] = bg_jobs[j + 1];
+            }
+            bg_count--;
+        } else {
+            i++;
+        }
+    }
+
         cmdline = readline(PROMPT);
-        if (cmdline == NULL) {
+        if (cmdline == NULL) { 
             printf("\nExiting shell...\n");
             break;
         }
@@ -56,17 +69,43 @@ int main() {
 
         add_to_history(cmdline);
 
-        arglist = tokenize(cmdline);
-        if (arglist != NULL) {
-            if (!handle_builtin(arglist)) {
-                execute(arglist); 
-            }
+        char* commands[MAXARGS];
+int n_cmds = 0;
+char* token = strtok(cmdline, ";");
+while (token != NULL && n_cmds < MAXARGS) {
+    commands[n_cmds++] = token;
+    token = strtok(NULL, ";");
+}
 
-            for (int i = 0; arglist[i] != NULL; i++) {
-                free(arglist[i]);
-            }
-            free(arglist);
+for (int j = 0; j < n_cmds; j++) {
+    char* cmd = commands[j];
+    while (*cmd == ' ' || *cmd == '\t') cmd++;
+    if (*cmd == '\0') continue;
+	int background = 0;
+	int len = strlen(cmd);
+	if (len > 0 && cmd[len - 1] == '&') {
+	    background = 1;
+	    cmd[len - 1] = '\0'; 
+	    while (len > 1 && (cmd[len - 2] == ' ' || cmd[len - 2] == '\t')) {
+	        cmd[len - 2] = '\0';
+	        len--;
+	    }
+	}
+	
+
+    char** arglist = tokenize(cmd);
+    if (arglist != NULL) {
+        if (!handle_builtin(arglist)) {
+            execute(arglist, background);
         }
+
+        for (int i = 0; arglist[i] != NULL; i++) {
+            free(arglist[i]);
+        }
+        free(arglist);
+    }
+}
+
 
         free(cmdline);
     }
