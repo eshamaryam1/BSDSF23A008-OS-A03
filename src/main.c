@@ -31,6 +31,7 @@ int main() {
     for (int i = 0; i < bg_count; ) {
         finished = waitpid(bg_jobs[i].pid, &status, WNOHANG);
         if (finished > 0) {
+            // Remove finished job
             for (int j = i; j < bg_count - 1; j++) {
                 bg_jobs[j] = bg_jobs[j + 1];
             }
@@ -68,7 +69,13 @@ int main() {
         add_history(cmdline);
 
         add_to_history(cmdline);
-
+	
+	if (strncmp(cmdline, "if", 2) == 0 && 
+    (cmdline[2] == ' ' || cmdline[2] == '\0')) {
+    handle_if_structure(cmdline);
+    free(cmdline);
+    continue; 
+}
         char* commands[MAXARGS];
 int n_cmds = 0;
 char* token = strtok(cmdline, ";");
