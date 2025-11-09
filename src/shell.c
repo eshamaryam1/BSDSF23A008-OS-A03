@@ -17,7 +17,7 @@ char* read_cmd(char* prompt, FILE* fp) {
 
     if (c == EOF && pos == 0) {
         free(cmdline);
-        return NULL;
+        return NULL; 
     }
     
     cmdline[pos] = '\0';
@@ -41,9 +41,9 @@ char** tokenize(char* cmdline) {
     int argnum = 0;
 
     while (*cp != '\0' && argnum < MAXARGS) {
-        while (*cp == ' ' || *cp == '\t') cp++;
+        while (*cp == ' ' || *cp == '\t') cp++; 
         
-        if (*cp == '\0') break;
+        if (*cp == '\0') break; 
 
         start = cp;
         len = 1;
@@ -98,7 +98,7 @@ int handle_builtin(char** arglist) {
         return 1;
     }
 
-    // jobs
+    // jobs 
     if (strcmp(arglist[0], "jobs") == 0) {
         printf("Job control not yet implemented.\n");
         return 1;
