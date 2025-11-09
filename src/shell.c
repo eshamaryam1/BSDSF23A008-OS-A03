@@ -17,7 +17,7 @@ char* read_cmd(char* prompt, FILE* fp) {
 
     if (c == EOF && pos == 0) {
         free(cmdline);
-        return NULL; 
+        return NULL;
     }
     
     cmdline[pos] = '\0';
@@ -111,5 +111,62 @@ int handle_builtin(char** arglist) {
 }
 
 
-    return 0; 
+    return 0;
+}
+
+
+void handle_if_structure(char *first_line) {
+    char *if_cmd = strdup(first_line + 3); 
+    char line[256];
+
+    char *then_block[50];
+    char *else_block[50];
+    int then_count = 0, else_count = 0;
+    int in_else = 0;
+
+    
+    while (1) {
+        printf("> ");  
+        fflush(stdout);
+
+        if (!fgets(line, sizeof(line), stdin))
+            break;
+
+        
+        line[strcspn(line, "\n")] = 0;
+
+        if (strcmp(line, "then") == 0) continue;
+        if (strcmp(line, "else") == 0) { in_else = 1; continue; }
+        if (strcmp(line, "fi") == 0) break;
+
+        if (!in_else)
+            then_block[then_count++] = strdup(line);
+        else
+            else_block[else_count++] = strdup(line);
+    }
+
+    
+    char **if_args = tokenize(if_cmd);
+
+    int status;
+    pid_t pid = fork();
+    if (pid == 0) {
+        execvp(if_args[0], if_args);
+        exit(1);
+    }
+    waitpid(pid, &status, 0);
+
+    int exit_code = WEXITSTATUS(status);
+
+   
+    char **chosen_block = (exit_code == 0) ? then_block : else_block;
+    int chosen_count = (exit_code == 0) ? then_count : else_count;
+
+    for (int i = 0; i < chosen_count; i++) {
+      	char **args = tokenize(chosen_block[i]);
+	execute(args, 0);
+	for (int j = 0; args[j] != NULL; j++)
+	    free(args[j]);
+	free(args); 
+    }
 }
