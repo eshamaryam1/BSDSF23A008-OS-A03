@@ -1,9 +1,67 @@
 #include "shell.h"
+shell_var_t *var_list = NULL;
+
 
 char* history[HISTORY_SIZE];
 int history_count = 0;
 job_t bg_jobs[MAX_JOBS];
 int bg_count = 0;
+
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+void set_variable(const char *name, const char *value) {
+    shell_var_t *curr = var_list;
+    while (curr) {
+        if (strcmp(curr->name, name) == 0) {
+            free(curr->value);
+            curr->value = strdup(value);
+            return;
+        }
+        curr = curr->next;
+    }
+    shell_var_t *new_var = malloc(sizeof(shell_var_t));
+    new_var->name = strdup(name);
+    new_var->value = strdup(value);
+    new_var->next = var_list;
+    var_list = new_var;
+}
+
+
+char* get_variable(const char *name) {
+    shell_var_t *curr = var_list;
+    while (curr) {
+        if (strcmp(curr->name, name) == 0) return curr->value;
+        curr = curr->next;
+    }
+    return NULL;
+}
+
+void expand_variables(char **args) {
+    for (int i = 0; args[i]; i++) {
+        if (args[i][0] == '$') {
+            char *val = get_variable(args[i] + 1); 
+            if (val) {
+                free(args[i]);
+                args[i] = strdup(val);
+            } else {
+                free(args[i]);
+                args[i] = strdup(""); 
+            }
+        }
+    }
+}
+
+
+void print_variables() {
+    shell_var_t *curr = var_list;
+    while (curr) {
+        printf("%s=%s\n", curr->name, curr->value);
+        curr = curr->next;
+    }
+}
+
 
 char* read_cmd(char* prompt, FILE* fp) {
     printf("%s", prompt);
@@ -17,7 +75,7 @@ char* read_cmd(char* prompt, FILE* fp) {
 
     if (c == EOF && pos == 0) {
         free(cmdline);
-        return NULL;
+        return NULL; 
     }
     
     cmdline[pos] = '\0';
@@ -110,8 +168,12 @@ int handle_builtin(char** arglist) {
     return 1;
 }
 
+	if (strcmp(arglist[0], "set") == 0) {
+	    print_variables();
+	    return 1;
+	}
 
-    return 0;
+    return 0; 
 }
 
 
