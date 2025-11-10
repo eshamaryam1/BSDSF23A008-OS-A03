@@ -31,7 +31,7 @@ int main() {
     for (int i = 0; i < bg_count; ) {
         finished = waitpid(bg_jobs[i].pid, &status, WNOHANG);
         if (finished > 0) {
-            // Remove finished job
+            
             for (int j = i; j < bg_count - 1; j++) {
                 bg_jobs[j] = bg_jobs[j + 1];
             }
@@ -102,15 +102,30 @@ for (int j = 0; j < n_cmds; j++) {
 
     char** arglist = tokenize(cmd);
     if (arglist != NULL) {
-        if (!handle_builtin(arglist)) {
-            execute(arglist, background);
-        }
 
-        for (int i = 0; arglist[i] != NULL; i++) {
-            free(arglist[i]);
-        }
+    char *eq_pos = strchr(arglist[0], '=');
+    if (eq_pos && eq_pos != arglist[0]) {
+        *eq_pos = 0;
+        char *var_name = arglist[0];
+        char *var_value = eq_pos + 1;
+        set_variable(var_name, var_value);
+        
+        for (int i = 0; arglist[i] != NULL; i++) free(arglist[i]);
         free(arglist);
+        continue; 
     }
+
+  
+    expand_variables(arglist);
+
+   
+    if (!handle_builtin(arglist)) {
+        execute(arglist, background);
+    }
+
+    for (int i = 0; arglist[i] != NULL; i++) free(arglist[i]);
+    free(arglist);
+	}
 }
 
 
