@@ -148,7 +148,8 @@ int handle_builtin(char** arglist) {
         printf("  exit            : Exit the shell.\n");
         printf("  help            : Show help.\n");
         printf("  jobs            : Show job placeholder.\n");
-        return 1;
+	printf("  set             : Display or assign variables\n");
+	return 1;
     }
 
     // jobs
@@ -232,3 +233,4 @@ void handle_if_structure(char *first_line) {
 	free(args); 
     }
 }
+
